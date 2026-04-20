@@ -1,5 +1,8 @@
+cl\innovatech\projectmanagement\controllers\TareaController.class
 cl\innovatech\projectmanagement\services\ProyectoService.class
-cl\innovatech\projectmanagement\InnovatechProjectManagementMicroserviceApplication.class
 cl\innovatech\projectmanagement\controllers\ProyectosController.class
-cl\innovatech\projectmanagement\entities\Tarea.class
 cl\innovatech\projectmanagement\entities\Proyecto.class
+cl\innovatech\projectmanagement\repository\TareaRepository.class
+cl\innovatech\projectmanagement\services\TareaService.class
+cl\innovatech\projectmanagement\InnovatechProjectManagementMicroserviceApplication.class
+cl\innovatech\projectmanagement\entities\Tarea.class

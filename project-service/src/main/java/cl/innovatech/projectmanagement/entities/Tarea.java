@@ -1,6 +1,7 @@
 package cl.innovatech.projectmanagement.entities;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "tareas")
@@ -23,7 +24,9 @@ public class Tarea {
     private Long idProfesionalAsignado;
 
     // Relación Many-To-One: Muchas tareas pertenecen a UN único Proyecto
-    // Esto reemplaza tu antiguo 'private long idProyecto', haciendo que JPA maneje la Llave Foránea 'proyecto_id'
+    // Esto reemplaza tu antiguo 'private long idProyecto', haciendo que JPA maneje
+    // la Llave Foránea 'proyecto_id'
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "proyecto_id", nullable = false)
     private Proyecto proyecto;
@@ -38,33 +41,79 @@ public class Tarea {
     private String comentarios;
 
     // Constructor vacío (Obligatorio para JPA)
-    public Tarea() {}
+    public Tarea() {
+    }
 
     // Getters y Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
 
-    public String getNombre() { return nombre; }
-    public void setNombre(String nombre) { this.nombre = nombre; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public String getDescripcion() { return descripcion; }
-    public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
+    public String getNombre() {
+        return nombre;
+    }
 
-    public String getEstado() { return estado; }
-    public void setEstado(String estado) { this.estado = estado; }
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
 
-    public Long getIdProfesionalAsignado() { return idProfesionalAsignado; }
-    public void setIdProfesionalAsignado(Long idProfesionalAsignado) { this.idProfesionalAsignado = idProfesionalAsignado; }
+    public String getDescripcion() {
+        return descripcion;
+    }
 
-    public Proyecto getProyecto() { return proyecto; }
-    public void setProyecto(Proyecto proyecto) { this.proyecto = proyecto; }
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
+    }
 
-    public String getFechaInicio() { return fechaInicio; }
-    public void setFechaInicio(String fechaInicio) { this.fechaInicio = fechaInicio; }
+    public String getEstado() {
+        return estado;
+    }
 
-    public String getFechaFin() { return fechaFin; }
-    public void setFechaFin(String fechaFin) { this.fechaFin = fechaFin; }
+    public void setEstado(String estado) {
+        this.estado = estado;
+    }
 
-    public String getComentarios() { return comentarios; }
-    public void setComentarios(String comentarios) { this.comentarios = comentarios; }
+    public Long getIdProfesionalAsignado() {
+        return idProfesionalAsignado;
+    }
+
+    public void setIdProfesionalAsignado(Long idProfesionalAsignado) {
+        this.idProfesionalAsignado = idProfesionalAsignado;
+    }
+
+    public Proyecto getProyecto() {
+        return proyecto;
+    }
+
+    public void setProyecto(Proyecto proyecto) {
+        this.proyecto = proyecto;
+    }
+
+    public String getFechaInicio() {
+        return fechaInicio;
+    }
+
+    public void setFechaInicio(String fechaInicio) {
+        this.fechaInicio = fechaInicio;
+    }
+
+    public String getFechaFin() {
+        return fechaFin;
+    }
+
+    public void setFechaFin(String fechaFin) {
+        this.fechaFin = fechaFin;
+    }
+
+    public String getComentarios() {
+        return comentarios;
+    }
+
+    public void setComentarios(String comentarios) {
+        this.comentarios = comentarios;
+    }
 }
