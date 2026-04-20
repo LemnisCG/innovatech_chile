@@ -23,10 +23,17 @@
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
         
-        <!-- Base de datos en memoria H2 para que el proyecto no se caiga al arrancar JPA -->
+        <!-- Base de datos en memoria H2 (la dejamos para pruebas) -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- Driver de PostgreSQL para producción/desarrollo real -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
     </dependencies>
