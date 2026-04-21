@@ -79,3 +79,39 @@ graph TD;
     MR -.->|Provee datos de capacidad| MA
     MP <-->|Depende de la asignación| MR
 ```
+
+---
+
+## Entorno de Desarrollo y Despliegue
+
+Para facilitar la colaboración y el trabajo en distintos entornos (Windows, Mac, Linux) y diversos IDEs (IntelliJ IDEA, Antigravity, VS Code), el proyecto está completamente contenerizado.
+
+### 1. Ejecutar Todo con Docker (Recomendado)
+Para levantar todos los microservicios y sus bases de datos asociadas en contenedores de Docker, sin necesitar tener instaladas versiones específicas de Java o Maven localmente:
+
+Construir y levantar en segundo plano (`-d`):
+```bash
+docker-compose up -d --build
+```
+* **Project Service**: `http://localhost:8081`
+* **Resource Service**: `http://localhost:8082`
+* **pgAdmin (BBDD)**: `http://localhost:5051` (admin@innovatech.cl / admin)
+
+Para detener la ejecución:
+```bash
+docker-compose down
+```
+
+### 2. Desarrollo con tu IDE Favorito
+Si prefieres correr el código localmente en tu IDE para poder usar Debug o probar cambios rápidamente, puedes levantar únicamente las bases de datos con Docker y ejecutar la aplicación desde el IDE.
+
+**Paso 1:** Levanta las bases de datos y pgAdmin:
+```bash
+docker-compose up -d project-db resource-db pgadmin
+```
+
+**Paso 2:** Ejecuta las aplicaciones:
+- **IntelliJ IDEA:** IntelliJ detectará automáticamente el proyecto multi-módulo Maven. Busca las clases `ProjectManagementApplication` y `ResourceServiceApplication` y presiona el botón verde de "Run/Debug".
+- **Antigravity / VS Code:** Asegúrate de aceptar las recomendaciones de extensiones (Extension Pack for Java y Spring Boot). Usa la pestaña "Spring Boot Dashboard" en el panel lateral para ejecutar los proyectos, o simplemente presiona Run en los archivos principales.
+
+*Nota: Las propiedades `application.properties` de los microservicios están configuradas con variables de entorno que tienen `localhost` por defecto. ¡Funcionarán mágicamente desde tu IDE sin configuración adicional!*

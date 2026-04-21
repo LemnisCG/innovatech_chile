@@ -1,10 +1,45 @@
 version: '3.8'
 
 services:
+  # --- MICROSERVICIOS ---
+  project-service:
+    build:
+      context: .
+      dockerfile: project-service/Dockerfile
+    container_name: innovatech_project_service
+    restart: on-failure
+    ports:
+      - "8081:8081"
+    environment:
+      DB_HOST: project-db
+      DB_PORT: 5432
+    depends_on:
+      - project-db
+    networks:
+      - innovatech-network
+
+  resource-service:
+    build:
+      context: .
+      dockerfile: resource-service/Dockerfile
+    container_name: innovatech_resource_service
+    restart: on-failure
+    ports:
+      - "8082:8082"
+    environment:
+      DB_HOST: resource-db
+      DB_PORT: 5432
+    depends_on:
+      - resource-db
+    networks:
+      - innovatech-network
+
+  # --- BASES DE DATOS ---
   # Base de datos exclusiva para el microservicio de Proyectos
   project-db:
     image: postgres:15-alpine
     container_name: innovatech_project_db
+    restart: always
     environment:
       POSTGRES_DB: innovatech_projects
       POSTGRES_USER: postgres
@@ -20,6 +55,7 @@ services:
   resource-db:
     image: postgres:15-alpine
     container_name: innovatech_resource_db
+    restart: always
     environment:
       POSTGRES_DB: innovatech_resources
       POSTGRES_USER: postgres
