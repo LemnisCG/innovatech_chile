@@ -1,0 +1,18 @@
+# Maven - carpetas de compilación
+target/
+
+# Maven Wrapper JAR (no se sube, sí se conservan los scripts mvnw y mvnw.cmd)
+!.mvn/wrapper/maven-wrapper.jar
+
+# IDEs - IntelliJ
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# IDEs - VS Code / Antigravity
+.vscode/settings.json
+
+# Sistema Operativo
+.DS_Store
+Thumbs.db

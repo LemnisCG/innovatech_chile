@@ -1,0 +1,7 @@
+.git
+**/.git
+**/.idea
+**/.vscode
+**/target/
+**/node_modules/
+**/*.class
