@@ -1,6 +1,7 @@
 package cl.innovatech.projectmanagement.services;
 
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.annotation.ApplicationScope;
 import cl.innovatech.projectmanagement.entities.Proyecto;
@@ -22,6 +23,10 @@ public class ProyectoService {
 
     public List<Proyecto> getProyectos() {
         return proyectoRepository.findAll();
+    }
+
+    public Optional<Proyecto> getProyectoById(Long id) {
+        return proyectoRepository.findById(id);
     }
 
     public void add(Proyecto nuevoProyecto) {
