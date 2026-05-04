@@ -33,6 +33,20 @@ services:
       - resource-db
     networks:
       - innovatech-network
+  
+  api-gateway:
+    build:
+      context: .
+      dockerfile: api-gateway/Dockerfile
+    container_name: innovatech_api_gateway
+    restart: on-failure
+    ports:
+      - "8080:8080"
+    depends_on:
+      - project-service
+      - resource-service
+    networks:
+      - innovatech-network
 
   # --- BASES DE DATOS ---
   # Base de datos exclusiva para el microservicio de Proyectos
