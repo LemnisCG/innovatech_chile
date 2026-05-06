@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/usuarios")
@@ -30,6 +31,18 @@ public class UsuarioController {
     @PostMapping
     public ResponseEntity<Usuario> createUsuario(@RequestBody Usuario usuario) {
         return ResponseEntity.ok(usuarioService.createUsuario(usuario));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<Usuario> login(@RequestBody Map<String, String> credentials) {
+        String username = credentials.get("username");
+        String password = credentials.get("password");
+        if (username == null || password == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        return usuarioService.login(username, password)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.status(401).build());
     }
 
     @PutMapping("/{id}")

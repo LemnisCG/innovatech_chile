@@ -19,6 +19,7 @@
         <module>project-service</module>
         <module>resource-service</module>
         <module>api-gateway</module>
+        <module>analytics-service</module>
     </modules>
 
     <properties>

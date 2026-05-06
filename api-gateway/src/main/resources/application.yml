@@ -16,3 +16,8 @@ spring:
           uri: http://resource-service:8082
           predicates:
             - Path=/recursos/**, /usuarios/**
+
+        - id: analytics-service
+          uri: http://analytics-service:8083
+          predicates:
+            - Path=/api/analytics/**

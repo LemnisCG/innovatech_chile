@@ -34,6 +34,23 @@ services:
     networks:
       - innovatech-network
   
+  analytics-service:
+    build:
+      context: .
+      dockerfile: analytics-service/Dockerfile
+    container_name: innovatech_analytics_service
+    restart: on-failure
+    ports:
+      - "8083:8083"
+    environment:
+      DB_HOST: project-db
+      DB_PORT: 5432
+    depends_on:
+      - project-db
+      - project-service
+    networks:
+      - innovatech-network
+
   api-gateway:
     build:
       context: .

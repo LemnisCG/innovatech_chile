@@ -26,6 +26,11 @@ public class UsuarioService {
         return usuarioRepository.save(usuario);
     }
 
+    public Optional<Usuario> login(String username, String password) {
+        return usuarioRepository.findByUsername(username)
+                .filter(usuario -> usuario.getPassword().equals(password) && usuario.isActive());
+    }
+
     public Optional<Usuario> updateUsuario(Long id, Usuario usuario) {
         return usuarioRepository.findById(id).map(existingUsuario -> {
             existingUsuario.setUsername(usuario.getUsername());
