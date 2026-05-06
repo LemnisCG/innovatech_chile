@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/api/analytics/kpis")
@@ -18,6 +19,7 @@ public class AnalyticsController {
     }
 
     @GetMapping("/productivity")
+    @PreAuthorize("hasAnyRole('ADMIN', 'JEFE_PROYECTO')")
     public ProductivityKpiDTO getProductivityKpi() {
         // En un caso real, estas consultas irían sobre fact_gestion_proyectos agregando por tiempo
         String sql = "SELECT AVG(lead_time_promedio_dias) as avg_lead_time, " +
@@ -33,6 +35,7 @@ public class AnalyticsController {
     }
 
     @GetMapping("/system-health")
+    @PreAuthorize("hasRole('ADMIN')")
     public SystemHealthKpiDTO getSystemHealthKpi() {
         // En un caso real, esto consulta fact_monitoreo_servicios
         String sql = "SELECT AVG(latencia_ms) as avg_latencia, " +

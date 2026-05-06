@@ -14,6 +14,9 @@ public class UsuarioService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
+    @Autowired
+    private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+
     public List<Usuario> getAllUsuarios() {
         return usuarioRepository.findAll();
     }
@@ -23,19 +26,23 @@ public class UsuarioService {
     }
 
     public Usuario createUsuario(Usuario usuario) {
+        usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
         return usuarioRepository.save(usuario);
     }
 
     public Optional<Usuario> login(String username, String password) {
         return usuarioRepository.findByUsername(username)
-                .filter(usuario -> usuario.getPassword().equals(password) && usuario.isActive());
+                .filter(usuario -> passwordEncoder.matches(password, usuario.getPassword()) && usuario.isActive());
     }
 
     public Optional<Usuario> updateUsuario(Long id, Usuario usuario) {
         return usuarioRepository.findById(id).map(existingUsuario -> {
             existingUsuario.setUsername(usuario.getUsername());
             existingUsuario.setEmail(usuario.getEmail());
-            existingUsuario.setPassword(usuario.getPassword());
+            // Only update password if provided
+            if (usuario.getPassword() != null && !usuario.getPassword().isEmpty()) {
+                existingUsuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
+            }
             existingUsuario.setEspecialidad(usuario.getEspecialidad());
             existingUsuario.setTelefono(usuario.getTelefono());
             existingUsuario.setDireccion(usuario.getDireccion());

@@ -13,6 +13,7 @@ import java.util.List;
 import cl.innovatech.projectmanagement.entities.Proyecto;
 import cl.innovatech.projectmanagement.entities.Tarea;
 import cl.innovatech.projectmanagement.services.ProyectoService;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @ApplicationScope
 @RestController
@@ -26,11 +27,13 @@ public class ProyectosController {
     }
 
     @GetMapping()
+    @PreAuthorize("hasAnyRole('ADMIN', 'JEFE_PROYECTO', 'MIEMBRO', 'CLIENTE')")
     public List<Proyecto> getProyectos() {
         return proyectosService.getProyectos();
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'JEFE_PROYECTO', 'MIEMBRO', 'CLIENTE')")
     public ResponseEntity<Proyecto> getProyectoById(@PathVariable Long id) {
         return proyectosService.getProyectoById(id)
                 .map(ResponseEntity::ok)
@@ -38,11 +41,13 @@ public class ProyectosController {
     }
 
     @PostMapping()
+    @PreAuthorize("hasRole('ADMIN')")
     public void crearProyecto(@RequestBody Proyecto nuevoProyecto) {
         proyectosService.add(nuevoProyecto);
     }
 
     @PostMapping("/{id}/tareas")
+    @PreAuthorize("hasAnyRole('ADMIN', 'JEFE_PROYECTO', 'MIEMBRO')")
     public void crearTarea(@PathVariable Long id, @RequestBody Tarea nuevaTarea) {
         System.out.println("Proyecto ID: " + id);
         System.out.println("Tarea: " + nuevaTarea);
