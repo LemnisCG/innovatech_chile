@@ -1,19 +1,20 @@
 package cl.innovatech.projectmanagement.controllers;
 
+import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.annotation.ApplicationScope;
-import java.util.List;
+
 import cl.innovatech.projectmanagement.entities.Proyecto;
 import cl.innovatech.projectmanagement.entities.Tarea;
 import cl.innovatech.projectmanagement.services.ProyectoService;
-import org.springframework.security.access.prepost.PreAuthorize;
 
 @ApplicationScope
 @RestController
@@ -41,7 +42,7 @@ public class ProyectosController {
     }
 
     @PostMapping()
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'JEFE_PROYECTO')")
     public void crearProyecto(@RequestBody Proyecto nuevoProyecto) {
         proyectosService.add(nuevoProyecto);
     }

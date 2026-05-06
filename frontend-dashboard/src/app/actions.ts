@@ -4,14 +4,20 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 
-const API_GATEWAY_URL = 'http://localhost:8080';
+const API_GATEWAY_URL = 'http://localhost:9000';
+
+const getAuthHeaders = async () => {
+  const cookieStore = await cookies();
+  const token = cookieStore.get('token')?.value;
+  return token ? { Authorization: `Bearer ${token}` } : undefined;
+};
 
 export async function loginAction(formData: FormData) {
   const username = formData.get('username') as string;
   const password = formData.get('password') as string;
 
   try {
-    const res = await fetch(`${API_GATEWAY_URL}/usuarios/login`, {
+    const res = await fetch(`${API_GATEWAY_URL}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password }),
@@ -21,22 +27,22 @@ export async function loginAction(formData: FormData) {
       throw new Error('Credenciales inválidas');
     }
 
-    const user = await res.json();
-    
-    // Simular sesión guardando el username en una cookie HTTP-only
+    const authResponse = await res.json();
     const cookieStore = await cookies();
-    cookieStore.set('session', user.username, { secure: true, httpOnly: true });
+    cookieStore.set('token', authResponse.token, { httpOnly: true, path: '/' });
+    cookieStore.set('session', username, { path: '/' });
 
   } catch (error) {
     if (error instanceof Error && error.message === 'NEXT_REDIRECT') throw error;
     throw new Error('Error de conexión con el servidor');
   }
-  
+
   redirect('/');
 }
 
 export async function logoutAction() {
   const cookieStore = await cookies();
+  cookieStore.delete('token');
   cookieStore.delete('session');
   redirect('/login');
 }
@@ -51,11 +57,10 @@ export async function registerAction(formData: FormData) {
     direccion: formData.get('direccion'),
     rut: formData.get('rut'),
     estado: 'ACTIVO',
-    active: true,
   };
 
   try {
-    const res = await fetch(`${API_GATEWAY_URL}/usuarios`, {
+    const res = await fetch(`${API_GATEWAY_URL}/api/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -64,12 +69,17 @@ export async function registerAction(formData: FormData) {
     if (!res.ok) {
       throw new Error('Error al registrar el recurso. Posible nombre duplicado.');
     }
+
+    const authResponse = await res.json();
+    const cookieStore = await cookies();
+    cookieStore.set('token', authResponse.token, { httpOnly: true, path: '/' });
+    cookieStore.set('session', payload.username as string, { path: '/' });
   } catch (error) {
     if (error instanceof Error && error.message === 'NEXT_REDIRECT') throw error;
     throw new Error('Error de conexión con el servidor');
   }
-  
-  redirect('/login');
+
+  redirect('/');
 }
 
 export async function createProjectAction(formData: FormData) {
@@ -83,9 +93,10 @@ export async function createProjectAction(formData: FormData) {
   };
 
   try {
+    const authHeaders = await getAuthHeaders();
     const res = await fetch(`${API_GATEWAY_URL}/proyectos`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...authHeaders },
       body: JSON.stringify(payload),
     });
 
@@ -96,7 +107,7 @@ export async function createProjectAction(formData: FormData) {
     if (error instanceof Error && error.message === 'NEXT_REDIRECT') throw error;
     throw new Error('Error de conexión con el servidor');
   }
-  
+
   revalidatePath('/');
   redirect('/');
 }
@@ -109,9 +120,10 @@ export async function createTaskAction(projectId: string, formData: FormData) {
   };
 
   try {
+    const authHeaders = await getAuthHeaders();
     const res = await fetch(`${API_GATEWAY_URL}/proyectos/${projectId}/tareas`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...authHeaders },
       body: JSON.stringify(payload),
     });
 
@@ -122,7 +134,7 @@ export async function createTaskAction(projectId: string, formData: FormData) {
     if (error instanceof Error && error.message === 'NEXT_REDIRECT') throw error;
     throw new Error('Error de conexión con el servidor');
   }
-  
+
   revalidatePath(`/projects/${projectId}`);
   redirect(`/projects/${projectId}`);
 }

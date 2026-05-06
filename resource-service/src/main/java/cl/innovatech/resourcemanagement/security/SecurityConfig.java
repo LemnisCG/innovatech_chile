@@ -41,11 +41,11 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/login").permitAll()
-                .anyRequest().authenticated() 
+                .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
+                .anyRequest().authenticated()
             )
             .addFilterBefore(headerAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-        
+
         return http.build();
     }
 }
