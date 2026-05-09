@@ -4,7 +4,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 
-const API_GATEWAY_URL = 'http://localhost:9000';
+const API_GATEWAY_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000';
 
 const getAuthHeaders = async () => {
   const cookieStore = await cookies();

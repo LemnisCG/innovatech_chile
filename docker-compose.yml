@@ -33,7 +33,7 @@ services:
       - resource-db
     networks:
       - innovatech-network
-  
+
   analytics-service:
     build:
       context: .
@@ -62,6 +62,22 @@ services:
     depends_on:
       - project-service
       - resource-service
+      - analytics-service
+    networks:
+      - innovatech-network
+
+  frontend:
+    build:
+      context: ./frontend-dashboard
+      dockerfile: Dockerfile
+    container_name: innovatech_frontend
+    restart: on-failure
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://api-gateway:9000
+    depends_on:
+      - api-gateway
     networks:
       - innovatech-network
 

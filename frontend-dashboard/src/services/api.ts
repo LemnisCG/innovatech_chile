@@ -29,7 +29,7 @@ export interface Proyecto {
   tareasDelProyecto: Tarea[];
 }
 
-const API_GATEWAY_URL = 'http://localhost:9000';
+const API_GATEWAY_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000';
 const ANALYTICS_URL = `${API_GATEWAY_URL}/api/analytics/kpis`;
 
 const getAuthHeaders = async (): Promise<HeadersInit | undefined> => {
