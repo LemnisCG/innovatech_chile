@@ -43,10 +43,10 @@ services:
     ports:
       - "8083:8083"
     environment:
-      DB_HOST: project-db
+      DB_HOST: analytics-db
       DB_PORT: 5432
     depends_on:
-      - project-db
+      - analytics-db
       - project-service
     networks:
       - innovatech-network
@@ -114,6 +114,22 @@ services:
     networks:
       - innovatech-network
 
+  # Base de datos exclusiva para el microservicio de Analítica
+  analytics-db:
+    image: postgres:15-alpine
+    container_name: innovatech_analytics_db
+    restart: always
+    environment:
+      POSTGRES_DB: innovatech_analytics
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5436:5432" # Mapeamos al 5436 para independizarlo completamente
+    volumes:
+      - analytics_db_data:/var/lib/postgresql/data
+    networks:
+      - innovatech-network
+
   # Interfaz gráfica para administrar las bases de datos
   pgadmin:
     image: dpage/pgadmin4
@@ -126,12 +142,14 @@ services:
     depends_on:
       - project-db
       - resource-db
+      - analytics-db
     networks:
       - innovatech-network
 
 volumes:
   project_db_data:
   resource_db_data:
+  analytics_db_data:
 
 networks:
   innovatech-network:
