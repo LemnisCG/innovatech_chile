@@ -80,7 +80,7 @@ public class ETLService {
                     if (p.getTareasDelProyecto() != null) {
                         totalTareas = p.getTareasDelProyecto().size();
                         for (TareaIntegrationDTO t : p.getTareasDelProyecto()) {
-                            if ("COMPLETADA".equalsIgnoreCase(t.getEstado()) || "DONE".equalsIgnoreCase(t.getEstado())) {
+                            if ("COMPLETADO".equalsIgnoreCase(t.getEstado()) || "COMPLETADA".equalsIgnoreCase(t.getEstado()) || "DONE".equalsIgnoreCase(t.getEstado())) {
                                 tareasCompletadas++;
                             }
                         }
@@ -139,9 +139,25 @@ public class ETLService {
         proyecto.setIdProyecto(p.getId());
         proyecto.setNombre(p.getNombre());
         proyecto.setEstado(p.getEstado() != null ? p.getEstado() : "UNKNOWN");
-        proyecto.setFechaInicio(p.getFechaInicio());
-        proyecto.setFechaFin(p.getFechaFin());
+        proyecto.setFechaInicio(parseFecha(p.getFechaInicio()));
+        proyecto.setFechaFin(parseFecha(p.getFechaFin()));
         
         return dimProyectoRepository.save(proyecto);
+    }
+
+    /**
+     * Convierte un String de fecha (formato "yyyy-MM-dd") a LocalDate.
+     * Retorna null si el String es null o vacío.
+     */
+    private LocalDate parseFecha(String fecha) {
+        if (fecha == null || fecha.isBlank()) {
+            return null;
+        }
+        try {
+            return LocalDate.parse(fecha);
+        } catch (Exception e) {
+            log.warn("No se pudo parsear la fecha: {}", fecha);
+            return null;
+        }
     }
 }
