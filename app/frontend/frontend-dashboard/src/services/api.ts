@@ -14,6 +14,7 @@ export interface Tarea {
   nombre: string;
   descripcion: string;
   estado: string;
+  idProfesionalAsignado?: number;
 }
 
 import { cookies } from 'next/headers';

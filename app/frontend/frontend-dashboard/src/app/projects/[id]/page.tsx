@@ -1,5 +1,5 @@
 import { fetchProjectById, fetchUsuarios } from '@/services/api';
-import { createTaskAction } from '@/app/actions';
+import { createTaskAction, updateTaskStatusAction } from '@/app/actions';
 import { notFound } from 'next/navigation';
 import { cookies } from 'next/headers';
 import { Calendar, CheckCircle2 } from 'lucide-react';
@@ -11,11 +11,14 @@ export default async function ProjectDetailsPage({ params }: { params: { id: str
   
   // We need to await params in Next.js 15
   const { id } = await params;
+  const username = session?.value;
   
   const [project, usuarios] = await Promise.all([
     fetchProjectById(id),
     fetchUsuarios()
   ]);
+
+  const loggedInUser = username ? usuarios.find(u => u.username === username) : null;
 
   if (!project) {
     notFound();
@@ -67,10 +70,34 @@ export default async function ProjectDetailsPage({ params }: { params: { id: str
                   <div>
                     <h3 className="font-medium text-slate-200 text-lg mb-1">{tarea.nombre}</h3>
                     <p className="text-slate-400 text-sm">{tarea.descripcion}</p>
+                    
+                    {tarea.idProfesionalAsignado && (
+                      <p className="text-slate-500 text-xs mt-2">
+                        Responsable: {usuarios.find(u => u.id === tarea.idProfesionalAsignado)?.username || 'Desconocido'}
+                      </p>
+                    )}
                   </div>
-                  <span className="text-xs px-3 py-1 bg-slate-800 text-slate-300 rounded-full border border-slate-700">
-                    {tarea.estado}
-                  </span>
+                  
+                  {loggedInUser && tarea.idProfesionalAsignado === loggedInUser.id ? (
+                    <form action={updateTaskStatusAction.bind(null, project.id.toString(), tarea.id)} className="flex items-center gap-2">
+                      <select 
+                        name="estado" 
+                        defaultValue={tarea.estado}
+                        className="text-xs px-3 py-1 bg-slate-900 text-slate-300 rounded-full border border-slate-700 focus:outline-none focus:border-blue-500"
+                      >
+                        <option value="PENDIENTE">PENDIENTE</option>
+                        <option value="EN_PROGRESO">EN_PROGRESO</option>
+                        <option value="COMPLETADO">COMPLETADO</option>
+                      </select>
+                      <button type="submit" className="text-xs px-3 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded-full transition-colors">
+                        Actualizar
+                      </button>
+                    </form>
+                  ) : (
+                    <span className="text-xs px-3 py-1 bg-slate-800 text-slate-300 rounded-full border border-slate-700">
+                      {tarea.estado}
+                    </span>
+                  )}
                 </div>
               ))
             )}

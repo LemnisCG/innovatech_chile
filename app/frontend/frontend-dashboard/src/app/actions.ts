@@ -142,3 +142,31 @@ export async function createTaskAction(projectId: string, formData: FormData) {
   revalidatePath(`/projects/${projectId}`);
   redirect(`/projects/${projectId}`);
 }
+
+export async function updateTaskStatusAction(projectId: string, taskId: number, formData: FormData) {
+  const payload = {
+    estado: formData.get('estado'),
+  };
+
+  try {
+    const authHeaders = await getAuthHeaders();
+    const res = await fetch(`${API_GATEWAY_URL}/tareas/${taskId}/estado`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', ...authHeaders },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const err = await res.text();
+      console.error('Backend returned an error:', res.status, err);
+      throw new Error(`Error al actualizar el estado de la tarea. Status: ${res.status}`);
+    }
+  } catch (error) {
+    if (error instanceof Error && error.message === 'NEXT_REDIRECT') throw error;
+    console.error('Error during updateTaskStatusAction:', error);
+    throw error; // Throw the actual error so we can see it in server logs if needed
+  }
+
+  revalidatePath(`/projects/${projectId}`);
+  redirect(`/projects/${projectId}`);
+}

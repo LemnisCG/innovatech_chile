@@ -27,4 +27,14 @@ public class TareaController {
     public Tarea getTareaById(@PathVariable Long id) {
         return tareaService.getTareaById(id);
     }
+
+    @org.springframework.web.bind.annotation.PutMapping("/{id}/estado")
+    public Tarea updateEstado(@PathVariable Long id, @org.springframework.web.bind.annotation.RequestBody java.util.Map<String, String> payload) {
+        Tarea tarea = tareaService.getTareaById(id);
+        if (tarea != null && payload.containsKey("estado")) {
+            tarea.setEstado(payload.get("estado"));
+            return tareaService.save(tarea);
+        }
+        return null;
+    }
 }
