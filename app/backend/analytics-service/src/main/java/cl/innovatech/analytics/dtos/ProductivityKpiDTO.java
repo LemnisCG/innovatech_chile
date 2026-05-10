@@ -6,9 +6,9 @@ public class ProductivityKpiDTO {
     private Integer totalProyectosActivos;
 
     public ProductivityKpiDTO(Double leadTimePromedioDias, Double tasaCompletitud, Integer totalProyectosActivos) {
-        this.leadTimePromedioDias = leadTimePromedioDias;
-        this.tasaCompletitud = tasaCompletitud;
-        this.totalProyectosActivos = totalProyectosActivos;
+        this.leadTimePromedioDias = leadTimePromedioDias != null ? leadTimePromedioDias : 0.0;
+        this.tasaCompletitud = tasaCompletitud != null ? tasaCompletitud : 0.0;
+        this.totalProyectosActivos = totalProyectosActivos != null ? totalProyectosActivos : 0;
     }
 
     public Double getLeadTimePromedioDias() {

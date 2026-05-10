@@ -1,11 +1,10 @@
-version: '3.8'
 
 services:
   # --- MICROSERVICIOS ---
   project-service:
     build:
       context: .
-      dockerfile: project-service/Dockerfile
+      dockerfile: app/backend/project-service/Dockerfile
     container_name: innovatech_project_service
     restart: on-failure
     ports:
@@ -21,7 +20,7 @@ services:
   resource-service:
     build:
       context: .
-      dockerfile: resource-service/Dockerfile
+      dockerfile: app/backend/resource-service/Dockerfile
     container_name: innovatech_resource_service
     restart: on-failure
     ports:
@@ -37,7 +36,7 @@ services:
   analytics-service:
     build:
       context: .
-      dockerfile: analytics-service/Dockerfile
+      dockerfile: app/backend/analytics-service/Dockerfile
     container_name: innovatech_analytics_service
     restart: on-failure
     ports:
@@ -54,7 +53,7 @@ services:
   api-gateway:
     build:
       context: .
-      dockerfile: api-gateway/Dockerfile
+      dockerfile: app/backend/api-gateway/Dockerfile
     container_name: innovatech_api_gateway
     restart: on-failure
     ports:
@@ -68,7 +67,7 @@ services:
 
   frontend:
     build:
-      context: ./frontend-dashboard
+      context: ./app/frontend/frontend-dashboard
       dockerfile: Dockerfile
     container_name: innovatech_frontend
     restart: on-failure

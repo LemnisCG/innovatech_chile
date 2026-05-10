@@ -5,8 +5,8 @@ public class SystemHealthKpiDTO {
     private Double tasaErroresPorcentaje;
 
     public SystemHealthKpiDTO(Double latenciaPromedioMs, Double tasaErroresPorcentaje) {
-        this.latenciaPromedioMs = latenciaPromedioMs;
-        this.tasaErroresPorcentaje = tasaErroresPorcentaje;
+        this.latenciaPromedioMs = latenciaPromedioMs != null ? latenciaPromedioMs : 0.0;
+        this.tasaErroresPorcentaje = tasaErroresPorcentaje != null ? tasaErroresPorcentaje : 0.0;
     }
 
     public Double getLatenciaPromedioMs() {
