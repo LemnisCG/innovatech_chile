@@ -117,6 +117,10 @@ export async function createTaskAction(projectId: string, formData: FormData) {
     nombre: formData.get('nombre'),
     descripcion: formData.get('descripcion'),
     estado: formData.get('estado') || 'PENDIENTE',
+    idProfesionalAsignado: formData.get('idProfesionalAsignado') ? parseInt(formData.get('idProfesionalAsignado') as string) : null,
+    fechaInicio: formData.get('fechaInicio'),
+    fechaFin: formData.get('fechaFin'),
+    comentarios: formData.get('comentarios'),
   };
 
   try {

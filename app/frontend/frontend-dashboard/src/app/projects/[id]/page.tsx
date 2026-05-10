@@ -1,8 +1,9 @@
-import { fetchProjectById } from '@/services/api';
+import { fetchProjectById, fetchUsuarios } from '@/services/api';
 import { createTaskAction } from '@/app/actions';
 import { notFound } from 'next/navigation';
 import { cookies } from 'next/headers';
 import { Calendar, CheckCircle2 } from 'lucide-react';
+import { CreateTaskModal } from '@/components/CreateTaskModal';
 
 export default async function ProjectDetailsPage({ params }: { params: { id: string } }) {
   const cookieStore = await cookies();
@@ -11,7 +12,10 @@ export default async function ProjectDetailsPage({ params }: { params: { id: str
   // We need to await params in Next.js 15
   const { id } = await params;
   
-  const project = await fetchProjectById(id);
+  const [project, usuarios] = await Promise.all([
+    fetchProjectById(id),
+    fetchUsuarios()
+  ]);
 
   if (!project) {
     notFound();
@@ -73,40 +77,15 @@ export default async function ProjectDetailsPage({ params }: { params: { id: str
           </div>
         </div>
 
-        {/* Formulario Agregar Tarea */}
+        {/* Acciones del Proyecto */}
         <div>
           <div className="glass p-6 rounded-2xl sticky top-24">
-            <h2 className="text-xl font-semibold text-slate-200 mb-6">Agregar Nueva Tarea</h2>
-            {session ? (
-              <form action={addTask} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">Nombre</label>
-                  <input type="text" name="nombre" required className="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">Descripción</label>
-                  <textarea name="descripcion" rows={3} required className="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">Estado</label>
-                  <select name="estado" className="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="PENDIENTE">Pendiente</option>
-                    <option value="EN_PROGRESO">En Progreso</option>
-                    <option value="COMPLETADO">Completado</option>
-                  </select>
-                </div>
-                <button type="submit" className="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-2 rounded-lg transition-colors mt-2">
-                  Crear Tarea
-                </button>
-              </form>
-            ) : (
-              <div className="text-center p-4 bg-slate-900/50 rounded-xl border border-slate-700">
-                <p className="text-slate-400 text-sm mb-3">Debes iniciar sesión para agregar tareas.</p>
-                <a href="/login" className="inline-block bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg text-sm transition-colors">
-                  Ir al Login
-                </a>
-              </div>
-            )}
+            <h2 className="text-xl font-semibold text-slate-200 mb-6">Acciones</h2>
+            <CreateTaskModal 
+              usuarios={usuarios} 
+              addTaskAction={addTask} 
+              isLoggedIn={!!session} 
+            />
           </div>
         </div>
       </div>

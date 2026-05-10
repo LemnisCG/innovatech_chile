@@ -85,3 +85,23 @@ export const fetchProjectById = async (id: string): Promise<Proyecto | null> => 
     return null;
   }
 };
+
+export interface Usuario {
+  id: number;
+  username: string;
+  email: string;
+  especialidad: string;
+  estado: string;
+}
+
+export const fetchUsuarios = async (): Promise<Usuario[]> => {
+  try {
+    const authHeaders = await getAuthHeaders();
+    const res = await fetch(`${API_GATEWAY_URL}/usuarios`, { cache: 'no-store', headers: authHeaders });
+    if (!res.ok) throw new Error('Error fetching usuarios');
+    return res.json();
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
+};
