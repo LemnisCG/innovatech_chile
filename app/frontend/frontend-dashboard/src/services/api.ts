@@ -93,6 +93,7 @@ export interface Usuario {
   email: string;
   especialidad: string;
   estado: string;
+  roles?: string[];
 }
 
 export const fetchUsuarios = async (): Promise<Usuario[]> => {

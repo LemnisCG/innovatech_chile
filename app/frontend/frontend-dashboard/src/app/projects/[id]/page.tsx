@@ -78,26 +78,32 @@ export default async function ProjectDetailsPage({ params }: { params: { id: str
                     )}
                   </div>
                   
-                  {loggedInUser && tarea.idProfesionalAsignado === loggedInUser.id ? (
-                    <form action={updateTaskStatusAction.bind(null, project.id.toString(), tarea.id)} className="flex items-center gap-2">
-                      <select 
-                        name="estado" 
-                        defaultValue={tarea.estado}
-                        className="text-xs px-3 py-1 bg-slate-900 text-slate-300 rounded-full border border-slate-700 focus:outline-none focus:border-blue-500"
-                      >
-                        <option value="PENDIENTE">PENDIENTE</option>
-                        <option value="EN_PROGRESO">EN_PROGRESO</option>
-                        <option value="COMPLETADO">COMPLETADO</option>
-                      </select>
-                      <button type="submit" className="text-xs px-3 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded-full transition-colors">
-                        Actualizar
-                      </button>
-                    </form>
-                  ) : (
-                    <span className="text-xs px-3 py-1 bg-slate-800 text-slate-300 rounded-full border border-slate-700">
-                      {tarea.estado}
-                    </span>
-                  )}
+                  {(() => {
+                    const isAssigned = loggedInUser && tarea.idProfesionalAsignado === loggedInUser.id;
+                    const isAdminOrJefe = loggedInUser?.roles?.some(r => r === 'ADMIN' || r === 'JEFE_PROYECTO');
+                    const canEdit = isAssigned || isAdminOrJefe;
+
+                    return canEdit && loggedInUser ? (
+                      <form action={updateTaskStatusAction.bind(null, project.id.toString(), tarea.id, loggedInUser.id)} className="flex items-center gap-2">
+                        <select 
+                          name="estado" 
+                          defaultValue={tarea.estado}
+                          className="text-xs px-3 py-1 bg-slate-900 text-slate-300 rounded-full border border-slate-700 focus:outline-none focus:border-blue-500"
+                        >
+                          <option value="PENDIENTE">PENDIENTE</option>
+                          <option value="EN_PROGRESO">EN_PROGRESO</option>
+                          <option value="COMPLETADO">COMPLETADO</option>
+                        </select>
+                        <button type="submit" className="text-xs px-3 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded-full transition-colors">
+                          Actualizar
+                        </button>
+                      </form>
+                    ) : (
+                      <span className="text-xs px-3 py-1 bg-slate-800 text-slate-300 rounded-full border border-slate-700">
+                        {tarea.estado}
+                      </span>
+                    );
+                  })()}
                 </div>
               ))
             )}

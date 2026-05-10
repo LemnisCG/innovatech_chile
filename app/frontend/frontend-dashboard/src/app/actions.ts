@@ -143,9 +143,10 @@ export async function createTaskAction(projectId: string, formData: FormData) {
   redirect(`/projects/${projectId}`);
 }
 
-export async function updateTaskStatusAction(projectId: string, taskId: number, formData: FormData) {
+export async function updateTaskStatusAction(projectId: string, taskId: number, userId: number, formData: FormData) {
   const payload = {
     estado: formData.get('estado'),
+    userId: userId.toString(),
   };
 
   try {
@@ -164,7 +165,7 @@ export async function updateTaskStatusAction(projectId: string, taskId: number, 
   } catch (error) {
     if (error instanceof Error && error.message === 'NEXT_REDIRECT') throw error;
     console.error('Error during updateTaskStatusAction:', error);
-    throw error; // Throw the actual error so we can see it in server logs if needed
+    throw error;
   }
 
   revalidatePath(`/projects/${projectId}`);
