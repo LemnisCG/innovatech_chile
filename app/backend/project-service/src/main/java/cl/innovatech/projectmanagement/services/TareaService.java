@@ -31,6 +31,10 @@ public class TareaService {
         return tareaRepository.findById(id).orElse(null);
     }
 
+    public Tarea save(Tarea tarea) {
+        return tareaRepository.save(tarea);
+    }
+
     private TareaDTO toTareaDTO(Tarea tarea) {
         return new TareaDTO(
                 tarea.getId(),
