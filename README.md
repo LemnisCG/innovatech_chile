@@ -84,34 +84,103 @@ graph TD;
 
 ## Entorno de Desarrollo y Despliegue
 
-Para facilitar la colaboración y el trabajo en distintos entornos (Windows, Mac, Linux) y diversos IDEs (IntelliJ IDEA, Antigravity, VS Code), el proyecto está completamente contenerizado.
+Este proyecto está completamente contenerizado para facilitar la colaboración en diferentes entornos (Windows, Mac, Linux) y con diversos IDEs (IntelliJ IDEA, VS Code, etc.). A continuación, se explica paso a paso cómo levantar el proyecto completo.
 
-### 1. Ejecutar Todo con Docker (Recomendado)
-Para levantar todos los microservicios y sus bases de datos asociadas en contenedores de Docker, sin necesitar tener instaladas versiones específicas de Java o Maven localmente:
+### Prerrequisitos Generales
+Antes de comenzar, asegúrate de tener instalados:
+- **Docker**: Versión 20.10 o superior. [Descargar aquí](https://www.docker.com/get-started).
+- **Docker Compose**: Generalmente viene incluido con Docker Desktop. Si no, [instálalo aquí](https://docs.docker.com/compose/install/).
+- **Git**: Para clonar el repositorio (opcional si ya tienes el código).
 
-Construir y levantar en segundo plano (`-d`):
-```bash
-docker-compose up -d --build
-```
-* **Project Service**: `http://localhost:8081`
-* **Resource Service**: `http://localhost:8082`
-* **pgAdmin (BBDD)**: `http://localhost:5051` (admin@innovatech.cl / admin)
+### Método 1: Ejecutar Todo con Docker (Recomendado para Inicio Rápido)
+Este método levanta todos los microservicios, bases de datos y el frontend en contenedores, sin necesidad de instalar Java, Maven o Node.js localmente.
 
-Para detener la ejecución:
-```bash
-docker-compose down
-```
+#### Pasos:
+1. **Clona o navega al repositorio**:
+   - Si no tienes el código, clónalo: `git clone <url-del-repositorio>`
+   - Navega al directorio del proyecto: `cd innovatech_chile`
 
-### 2. Desarrollo con tu IDE Favorito
-Si prefieres correr el código localmente en tu IDE para poder usar Debug o probar cambios rápidamente, puedes levantar únicamente las bases de datos con Docker y ejecutar la aplicación desde el IDE.
+2. **Verifica que Docker esté corriendo**:
+   - Ejecuta `docker --version` y `docker-compose --version` para confirmar que están instalados.
 
-**Paso 1:** Levanta las bases de datos y pgAdmin:
-```bash
-docker-compose up -d project-db resource-db pgadmin
-```
+3. **Construye y levanta todos los servicios**:
+   - Ejecuta el comando: `docker-compose up -d --build`
+   - Este comando:
+     - Descarga las imágenes base (Java, Node.js, PostgreSQL, etc.).
+     - Construye las imágenes de los microservicios y frontend.
+     - Levanta los contenedores en segundo plano (`-d` significa detached).
+     - La primera vez puede tomar varios minutos (descarga de dependencias, compilación, etc.).
 
-**Paso 2:** Ejecuta las aplicaciones:
-- **IntelliJ IDEA:** IntelliJ detectará automáticamente el proyecto multi-módulo Maven. Busca las clases `ProjectManagementApplication` y `ResourceServiceApplication` y presiona el botón verde de "Run/Debug".
-- **Antigravity / VS Code:** Asegúrate de aceptar las recomendaciones de extensiones (Extension Pack for Java y Spring Boot). Usa la pestaña "Spring Boot Dashboard" en el panel lateral para ejecutar los proyectos, o simplemente presiona Run en los archivos principales.
+4. **Verifica que los servicios estén corriendo**:
+   - Ejecuta `docker-compose ps` para ver el estado de los contenedores.
+   - Todos deberían estar en estado "Up".
 
-*Nota: Las propiedades `application.properties` de los microservicios están configuradas con variables de entorno que tienen `localhost` por defecto. ¡Funcionarán mágicamente desde tu IDE sin configuración adicional!*
+5. **Accede a la aplicación**:
+   - **Frontend (Dashboard)**: Abre tu navegador y ve a `http://localhost:3000`
+   - **API Gateway**: `http://localhost:9000` (punto de entrada para las APIs)
+   - **Project Service**: `http://localhost:8081`
+   - **Resource Service**: `http://localhost:8082`
+   - **Analytics Service**: `http://localhost:8083`
+   - **pgAdmin (Administrador de Bases de Datos)**: `http://localhost:5052`
+     - Usuario: `admin@innovatech.cl`
+     - Contraseña: `admin`
+     - Conecta a las bases de datos usando los hosts: `project-db`, `resource-db`, `analytics-db` (puertos internos 5432).
+
+6. **Detén los servicios cuando termines**:
+   - Ejecuta `docker-compose down` para detener y eliminar los contenedores.
+   - Si quieres detener sin eliminar: `docker-compose stop`
+
+**Nota**: Si encuentras errores de puertos ocupados, cambia los puertos en `docker-compose.yml` o libera los puertos locales.
+
+### Método 2: Desarrollo Local con tu IDE (Recomendado para Desarrollo Activo)
+Si quieres desarrollar con debugging, hot-reload o modificar el código rápidamente, levanta solo las bases de datos con Docker y ejecuta los servicios desde tu IDE.
+
+#### Prerrequisitos Adicionales:
+- **Java**: Versión 17 o superior. [Descargar JDK](https://adoptium.net/).
+- **Maven**: Versión 3.6+. Viene incluido en muchos IDEs.
+- **Node.js**: Versión 18+. [Descargar aquí](https://nodejs.org/).
+- **IDE**: IntelliJ IDEA, VS Code con extensiones Java y Spring Boot, o similar.
+
+#### Pasos:
+1. **Prepara el entorno**:
+   - Instala los prerrequisitos mencionados.
+   - Clona o navega al directorio del proyecto.
+
+2. **Levanta las bases de datos y pgAdmin**:
+   - Ejecuta: `docker-compose up -d project-db resource-db analytics-db pgadmin`
+   - Esto inicia solo las DBs y pgAdmin, no los servicios Java.
+
+3. **Ejecuta los microservicios backend**:
+   - Abre tu IDE (IntelliJ IDEA recomendado).
+   - Importa el proyecto como un proyecto Maven multi-módulo (busca el `pom.xml` raíz).
+   - Busca las clases principales:
+     - `InnovatechProjectManagementMicroserviceApplication` en `app/backend/project-service`
+     - `ResourceServiceApplication` en `app/backend/resource-service`
+     - `AnalyticsServiceApplication` en `app/backend/analytics-service`
+     - `ApiGatewayApplication` en `app/backend/api-gateway`
+   - Ejecuta cada uno presionando el botón "Run" o "Debug" en tu IDE.
+   - Los servicios se conectarán automáticamente a las DBs en Docker (configurado en `application.properties`).
+
+4. **Ejecuta el frontend**:
+   - Navega a `app/frontend/frontend-dashboard`.
+   - Instala dependencias: `npm install`
+   - Ejecuta en modo desarrollo: `npm run dev`
+   - El frontend estará disponible en `http://localhost:3000` y se conectará al API Gateway.
+
+5. **Verifica el funcionamiento**:
+   - Accede al frontend en `http://localhost:3000`.
+   - Usa pgAdmin en `http://localhost:5052` para inspeccionar las bases de datos.
+
+6. **Detén todo**:
+   - Detén los servicios en tu IDE.
+   - Ejecuta `docker-compose down` para las DBs.
+
+**Nota**: Las configuraciones en `application.properties` usan variables de entorno que apuntan a `localhost` por defecto, por lo que funcionarán sin cambios adicionales.
+
+### Solución de Problemas Comunes
+- **Errores de compilación**: Asegúrate de que las versiones de Java y Maven sean correctas.
+- **Puertos ocupados**: Cambia los puertos en `docker-compose.yml` o libera los locales.
+- **Problemas con Docker**: Reinicia Docker Desktop o ejecuta `docker system prune` para limpiar.
+- **Frontend no carga**: Verifica que el API Gateway esté corriendo y accesible.
+
+Si encuentras problemas específicos, revisa los logs con `docker-compose logs <servicio>` o consulta la documentación en `docs/`.
