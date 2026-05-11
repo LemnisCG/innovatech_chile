@@ -11,6 +11,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import cl.innovatech.projectmanagement.dtos.TareaDTO;
 import cl.innovatech.projectmanagement.entities.Tarea;
 import cl.innovatech.projectmanagement.services.TareaService;
 
@@ -25,12 +26,12 @@ public class TareaController {
     }
 
     @GetMapping
-    public List<Tarea> getTareas() {
+    public List<TareaDTO> getTareas() {
         return tareaService.getTareas();
     }
 
     @GetMapping("/{id}")
-    public Tarea getTareaById(@PathVariable Long id) {
+    public TareaDTO getTareaById(@PathVariable Long id) {
         return tareaService.getTareaById(id);
     }
 
@@ -46,7 +47,7 @@ public class TareaController {
     @PutMapping("/{id}/estado")
     @PreAuthorize("hasAnyRole('ADMIN', 'JEFE_PROYECTO', 'MIEMBRO')")
     public ResponseEntity<?> updateEstado(@PathVariable Long id, @RequestBody Map<String, String> payload) {
-        Tarea tarea = tareaService.getTareaById(id);
+        Tarea tarea = tareaService.getTareaEntityById(id);
 
         if (tarea == null) {
             return ResponseEntity.notFound().build();
@@ -80,6 +81,7 @@ public class TareaController {
 
         tarea.setEstado(payload.get("estado"));
         Tarea updated = tareaService.save(tarea);
-        return ResponseEntity.ok(updated);
+        TareaDTO updatedDTO = tareaService.getTareaById(updated.getId());
+        return ResponseEntity.ok(updatedDTO);
     }
 }

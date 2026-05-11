@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.annotation.ApplicationScope;
 
-import cl.innovatech.projectmanagement.entities.Proyecto;
+import cl.innovatech.projectmanagement.dtos.ProyectoDTO;
+import cl.innovatech.projectmanagement.dtos.CreateProyectoDTO;
+import cl.innovatech.projectmanagement.dtos.CreateTareaDTO;
 import cl.innovatech.projectmanagement.entities.Tarea;
 import cl.innovatech.projectmanagement.services.ProyectoService;
 
@@ -29,13 +31,13 @@ public class ProyectosController {
 
     @GetMapping()
     @PreAuthorize("hasAnyRole('ADMIN', 'JEFE_PROYECTO', 'MIEMBRO', 'CLIENTE')")
-    public List<Proyecto> getProyectos() {
+    public List<ProyectoDTO> getProyectos() {
         return proyectosService.getProyectos();
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'JEFE_PROYECTO', 'MIEMBRO', 'CLIENTE')")
-    public ResponseEntity<Proyecto> getProyectoById(@PathVariable Long id) {
+    public ResponseEntity<ProyectoDTO> getProyectoById(@PathVariable Long id) {
         return proyectosService.getProyectoById(id)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
@@ -43,13 +45,21 @@ public class ProyectosController {
 
     @PostMapping()
     @PreAuthorize("hasAnyRole('ADMIN', 'JEFE_PROYECTO')")
-    public void crearProyecto(@RequestBody Proyecto nuevoProyecto) {
+    public void crearProyecto(@RequestBody CreateProyectoDTO nuevoProyecto) {
         proyectosService.add(nuevoProyecto);
     }
 
     @PostMapping("/{id}/tareas")
     @PreAuthorize("hasAnyRole('ADMIN', 'JEFE_PROYECTO', 'MIEMBRO')")
-    public void crearTarea(@PathVariable Long id, @RequestBody Tarea nuevaTarea) {
+    public void crearTarea(@PathVariable Long id, @RequestBody CreateTareaDTO nuevaTareaDTO) {
+        Tarea nuevaTarea = new Tarea();
+        nuevaTarea.setNombre(nuevaTareaDTO.getNombre());
+        nuevaTarea.setDescripcion(nuevaTareaDTO.getDescripcion());
+        nuevaTarea.setEstado(nuevaTareaDTO.getEstado());
+        nuevaTarea.setIdProfesionalAsignado(nuevaTareaDTO.getIdProfesionalAsignado());
+        nuevaTarea.setFechaInicio(nuevaTareaDTO.getFechaInicio());
+        nuevaTarea.setFechaFin(nuevaTareaDTO.getFechaFin());
+        nuevaTarea.setComentarios(nuevaTareaDTO.getComentarios());
         System.out.println("Proyecto ID: " + id);
         System.out.println("Tarea: " + nuevaTarea);
         proyectosService.addTarea(id, nuevaTarea);
