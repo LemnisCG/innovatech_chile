@@ -1,11 +1,10 @@
-version: '3.8'
 
 services:
   # --- MICROSERVICIOS ---
   project-service:
     build:
       context: .
-      dockerfile: project-service/Dockerfile
+      dockerfile: app/backend/project-service/Dockerfile
     container_name: innovatech_project_service
     restart: on-failure
     ports:
@@ -21,7 +20,7 @@ services:
   resource-service:
     build:
       context: .
-      dockerfile: resource-service/Dockerfile
+      dockerfile: app/backend/resource-service/Dockerfile
     container_name: innovatech_resource_service
     restart: on-failure
     ports:
@@ -33,18 +32,51 @@ services:
       - resource-db
     networks:
       - innovatech-network
-  
+
+  analytics-service:
+    build:
+      context: .
+      dockerfile: app/backend/analytics-service/Dockerfile
+    container_name: innovatech_analytics_service
+    restart: on-failure
+    ports:
+      - "8083:8083"
+    environment:
+      DB_HOST: analytics-db
+      DB_PORT: 5432
+    depends_on:
+      - analytics-db
+      - project-service
+    networks:
+      - innovatech-network
+
   api-gateway:
     build:
       context: .
-      dockerfile: api-gateway/Dockerfile
+      dockerfile: app/backend/api-gateway/Dockerfile
     container_name: innovatech_api_gateway
     restart: on-failure
     ports:
-      - "8080:8080"
+      - "9000:9000"
     depends_on:
       - project-service
       - resource-service
+      - analytics-service
+    networks:
+      - innovatech-network
+
+  frontend:
+    build:
+      context: ./app/frontend/frontend-dashboard
+      dockerfile: Dockerfile
+    container_name: innovatech_frontend
+    restart: on-failure
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://api-gateway:9000
+    depends_on:
+      - api-gateway
     networks:
       - innovatech-network
 
@@ -59,7 +91,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
     ports:
-      - "5433:5432" # Mapeamos al 5433 porque el 5432 parece estar ocupado en tu PC
+      - "5435:5432" # Mapeamos al 5435 para evitar conflictos adicionales
     volumes:
       - project_db_data:/var/lib/postgresql/data
     networks:
@@ -81,6 +113,22 @@ services:
     networks:
       - innovatech-network
 
+  # Base de datos exclusiva para el microservicio de Analítica
+  analytics-db:
+    image: postgres:15-alpine
+    container_name: innovatech_analytics_db
+    restart: always
+    environment:
+      POSTGRES_DB: innovatech_analytics
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5436:5432" # Mapeamos al 5436 para independizarlo completamente
+    volumes:
+      - analytics_db_data:/var/lib/postgresql/data
+    networks:
+      - innovatech-network
+
   # Interfaz gráfica para administrar las bases de datos
   pgadmin:
     image: dpage/pgadmin4
@@ -89,16 +137,18 @@ services:
       PGADMIN_DEFAULT_EMAIL: admin@innovatech.cl
       PGADMIN_DEFAULT_PASSWORD: admin
     ports:
-      - "5051:80"
+      - "5052:80"
     depends_on:
       - project-db
       - resource-db
+      - analytics-db
     networks:
       - innovatech-network
 
 volumes:
   project_db_data:
   resource_db_data:
+  analytics_db_data:
 
 networks:
   innovatech-network:

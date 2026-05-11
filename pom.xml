@@ -16,9 +16,10 @@
     <description>Innovatech Solutions Monorepo</description>
 
     <modules>
-        <module>project-service</module>
-        <module>resource-service</module>
-        <module>api-gateway</module>
+        <module>app/backend/project-service</module>
+        <module>app/backend/resource-service</module>
+        <module>app/backend/api-gateway</module>
+        <module>app/backend/analytics-service</module>
     </modules>
 
     <properties>
