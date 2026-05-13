@@ -114,7 +114,7 @@ export default async function DashboardPage() {
                     <td colSpan={4} className="px-6 py-8 text-center">No hay proyectos registrados aún.</td>
                   </tr>
                 ) : (
-                  projects.slice(0, 5).map((p) => (
+                  projects.map((p) => (
                     <tr key={p.id} className="hover:bg-slate-800/30 transition-colors">
                       <td className="px-6 py-4 font-medium text-slate-200">{p.nombre}</td>
                       <td className="px-6 py-4">
