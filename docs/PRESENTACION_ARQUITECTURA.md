@@ -222,6 +222,215 @@ Gestión de versiones del schema de base de datos con archivos SQL numerados por
 
 ---
 
+## PARTE 6B — ARQUETIPOS DE COMPONENTES
+
+Un **arquetipo** es un rol estructural que un componente cumple de forma recurrente en la arquitectura. No es un patrón de diseño específico, sino la **categoría funcional** que explica por qué ese componente existe. Identificarlos permite razonar sobre el sistema sin leer todo el código.
+
+### Arquetipos a nivel de servicio (macroarquitectura)
+
+| Arquetipo | Servicio en el proyecto | Responsabilidad |
+|---|---|---|
+| **Edge / Gateway** | `api-gateway` | Punto de entrada único. Valida identidad, enruta, protege la red interna |
+| **Domain Service** | `project-service` | Encapsula el dominio core: proyectos y tareas. Reglas de negocio propias |
+| **Domain Service** | `resource-service` | Encapsula el dominio de recursos humanos. También emite identidad (JWT) |
+| **Reporting / Analytics Service** | `analytics-service` | No tiene lógica transaccional. Solo lee, agrega y expone métricas |
+| **BFF (Backend For Frontend)** | `analytics-service` + Next.js server | Adapta y consolida datos para las necesidades específicas del dashboard |
+
+> Un `Domain Service` modifica estado. Un `Reporting Service` solo lee y calcula — nunca modifica datos de otros dominios.
+
+---
+
+### Arquetipos a nivel de componente (microarquitectura interna)
+
+Cada microservicio sigue la misma estructura en capas. Los arquetipos de componente son los roles que cada clase cumple dentro de esa estructura.
+
+#### 1. Entity (Entidad de dominio)
+
+Representa un concepto del negocio con **identidad propia** que persiste en base de datos.
+
+```
+project-service   →  Proyecto.java, Tarea.java
+resource-service  →  Usuario.java, Recurso.java
+analytics-service →  DimProyecto.java, DimTiempo.java, FactGestionProyectos.java
+```
+
+Características: tiene `@Entity`, tiene un `id` como clave primaria, su ciclo de vida lo gestiona Hibernate. No sale directamente por la API (para eso está el DTO).
+
+#### 2. Repository (Repositorio)
+
+Abstrae el **acceso a la base de datos**. El resto del código no sabe si detrás hay PostgreSQL, H2 u otro motor.
+
+```
+ProyectoRepository      extends JpaRepository<Proyecto, Long>
+TareaRepository         extends JpaRepository<Tarea, Long>
+UsuarioRepository       extends JpaRepository<Usuario, Long>
+RecursoRepository       extends JpaRepository<Recurso, Long>
+DimProyectoRepository   extends JpaRepository<DimProyecto, Long>
+FactGestionProyectosRepository ...
+```
+
+El `JpaRepository` de Spring Data genera automáticamente `findAll()`, `findById()`, `save()`, `deleteById()` sin código adicional.
+
+#### 3. Service (Servicio de aplicación)
+
+Contiene la **lógica de negocio**. Orquesta repositorios, valida reglas, decide qué persiste y qué retorna.
+
+```
+ProyectoService   →  crear proyecto, agregar tarea, listar proyectos
+TareaService      →  cambiar estado, asignar profesional
+RecursoService    →  crear asignación validando que el Usuario exista
+UsuarioService    →  CRUD de profesionales
+AnalyticsService  →  calcular KPIs consultando las fact tables
+ETLService        →  orquestar el proceso Extract-Transform-Load
+```
+
+Regla importante: el Service nunca retorna entidades JPA directamente hacia el Controller. Convierte a DTOs.
+
+#### 4. Controller (Controlador REST)
+
+Define los **endpoints HTTP** y delega al Service. No tiene lógica de negocio.
+
+```
+ProyectosController  →  GET /proyectos, POST /proyectos, GET /proyectos/{id}
+TareaController      →  POST /proyectos/{id}/tareas, PUT /tareas/{id}/estado
+RecursoController    →  CRUD en /recursos/**
+UsuarioController    →  CRUD en /usuarios/**
+AuthController       →  POST /api/auth/login, POST /api/auth/register
+AnalyticsController  →  GET /api/analytics/kpis/productivity, /system-health
+```
+
+#### 5. DTO (Data Transfer Object)
+
+Define el **contrato público de la API**: qué campos entran y cuáles salen. Desacopla la entidad interna de la representación externa.
+
+```
+CreateProyectoDTO   →  campos que acepta POST /proyectos (sin id, sin campos de auditoría)
+ProyectoDTO         →  campos que retorna GET /proyectos (incluye tareasDelProyecto)
+CreateTareaDTO      →  campos que acepta POST /proyectos/{id}/tareas
+TareaDTO            →  campos que retorna en respuestas
+ProductivityKpiDTO  →  lo que retorna /api/analytics/kpis/productivity
+SystemHealthKpiDTO  →  lo que retorna /api/analytics/kpis/system-health
+```
+
+Hay dos subtipos: **Command DTO** (lo que entra, ej. `CreateProyectoDTO`) y **View DTO** (lo que sale, ej. `ProyectoDTO`).
+
+#### 6. Security Filter / Authentication Filter
+
+Componente de **infraestructura de seguridad** que intercepta cada request antes de que llegue al Controller.
+
+```
+HeaderAuthenticationFilter  (project-service, resource-service, analytics-service)
+  → lee X-Auth-User y X-Auth-Roles inyectados por el Gateway
+  → construye el SecurityContext de Spring Security
+
+AuthenticationFilter        (api-gateway)
+  → valida el JWT Bearer del request entrante
+  → extrae claims y agrega X-Auth-User / X-Auth-Roles al request downstream
+```
+
+No tiene lógica de negocio. Solo responde una pregunta: "¿quién es el que llama y puedo confiar en él?"
+
+#### 7. Aspect / Interceptor (Componente transversal)
+
+Comportamiento que **cruza múltiples capas** sin pertenecer a ninguna en particular.
+
+```
+MonitoringAspect       →  mide tiempo de ejecución de todos los métodos de ProyectoService (AOP)
+HttpStatusInterceptor  →  captura el código HTTP de respuesta de cada endpoint del Controller
+```
+
+Estos no son llamados por nadie explícitamente — el framework los activa automáticamente en el momento correcto.
+
+#### 8. Seeder / DataInitializer
+
+Carga **datos iniciales** al arrancar la aplicación, solo en entornos de desarrollo.
+
+```
+DataSeeder (project-service)   →  crea proyectos y tareas de ejemplo al iniciar
+DataSeeder (resource-service)  →  crea usuarios de prueba (junto a Flyway migration V...Seed)
+```
+
+---
+
+### Mapa visual de arquetipos por servicio
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        project-service                          │
+│                                                                 │
+│  [Controller]──► [Service]──► [Repository]──► PostgreSQL        │
+│       │               │                                        │
+│  [DTO entrada]   [DTO salida]   [Entity]                        │
+│                       │                                        │
+│              [MonitoringAspect]  ← arquetipo transversal        │
+│              [HttpStatusInterceptor]                            │
+│              [HeaderAuthenticationFilter]                       │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│                       resource-service                          │
+│                                                                 │
+│  [AuthController]──► [UsuarioService]──► [UsuarioRepository]   │
+│  [RecursoController]──► [RecursoService]──► [RecursoRepository] │
+│       │                      │                    │             │
+│  [AuthRequest DTO]      [Entity]          PostgreSQL + Flyway   │
+│  [AuthResponse DTO]                                             │
+│              [JwtUtil] ← genera tokens                         │
+│              [HeaderAuthenticationFilter]                       │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│                      analytics-service                          │
+│                                                                 │
+│  [AnalyticsController]──► [AnalyticsService]──► [Repositories] │
+│                                │                    │           │
+│                     [ProductivityKpiDTO]      Star Schema       │
+│                     [SystemHealthKpiDTO]      PostgreSQL        │
+│                                                                 │
+│  [ETLService] ──HTTP──► project-service        @Scheduled cron  │
+│              [HeaderAuthenticationFilter]                       │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│                         api-gateway                             │
+│                                                                 │
+│  Internet ──► [AuthenticationFilter] ──► Route tables          │
+│                      │                       │                  │
+│                 [JwtUtil]            project / resource /        │
+│                                      analytics service          │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│                    frontend (Next.js)                           │
+│                                                                 │
+│  Browser ──► [Page/Server Component] ──► API Gateway           │
+│                      │                                         │
+│              [Server Actions]  ──► API Gateway (forms)          │
+│              [api.ts services] ──► fetch helpers tipados        │
+│              [MetricCard, Navigation] ── Client Components      │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### Pregunta de examen frecuente sobre arquetipos
+
+**P: ¿Qué diferencia hay entre un Service y un Controller?**
+
+El Controller es el arquetipo de **frontera** (boundary): existe para traducir el mundo HTTP al mundo Java y viceversa. Recibe un `@RequestBody`, llama al Service, y retorna un `ResponseEntity`. No toma decisiones de negocio.
+
+El Service es el arquetipo de **control**: tiene las reglas del dominio. Decide si se puede crear un recurso, valida invariantes, orquesta repositorios. No sabe nada de HTTP.
+
+Esta separación es lo que hace posible testear la lógica de negocio con tests de integración sin levantar un servidor HTTP.
+
+---
+
+**P: ¿Por qué la Entity y el DTO son arquetipos distintos si a veces tienen los mismos campos?**
+
+La Entity representa el estado persistido y tiene ciclo de vida gestionado por Hibernate (puede tener proxies lazy, anotaciones JPA, etc.). El DTO representa un mensaje que viaja por la red: es inmutable, serializable a JSON, y su forma puede ser distinta según quién consulte (un `GET` puede retornar más campos que un `POST`). Fusionarlos genera acoplamiento entre el modelo de persistencia y el contrato de la API.
+
+---
+
 ## PARTE 7 — MODELO ANALÍTICO: ROLAP Y STAR SCHEMA
 
 ### ¿Qué es un modelo Star Schema?
