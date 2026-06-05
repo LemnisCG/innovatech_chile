@@ -51,6 +51,7 @@ public class ProyectoService {
         if (proyecto != null) {
             System.out.println("Proyecto encontrado: " + proyecto);
             nuevaTarea.setProyecto(proyecto);
+            proyecto.getTareasDelProyecto().add(nuevaTarea);
             tareaRepository.save(nuevaTarea);
         }
     }
