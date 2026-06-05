@@ -7,12 +7,14 @@ import cl.innovatech.projectmanagement.repository.TareaRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 /**
  * Carga de datos de prueba para el microservicio de proyectos.
  * Solo inserta datos si la base de datos está vacía (count == 0).
  */
 @Configuration
+@Profile("!test")
 public class DataSeeder {
 
     @Bean

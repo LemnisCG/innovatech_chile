@@ -9,9 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import cl.innovatech.projectmanagement.aspects.MonitoringAspect;
+import org.springframework.jdbc.core.JdbcTemplate;
 import cl.innovatech.projectmanagement.entities.Proyecto;
 import cl.innovatech.projectmanagement.entities.Tarea;
 import cl.innovatech.projectmanagement.repository.ProyectoRepository;
@@ -24,12 +26,13 @@ import cl.innovatech.projectmanagement.dtos.CreateProyectoDTO;
         "spring.jpa.hibernate.ddl-auto=create-drop",
         "spring.jpa.show-sql=false"
 })
+@ActiveProfiles("test")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @Transactional
 public class ProyectoServiceIntegrationTest {
 
     @MockBean
-    private MonitoringAspect monitoringAspect;
+    private JdbcTemplate jdbcTemplate;
 
     @Autowired
     private ProyectoService proyectoService;
