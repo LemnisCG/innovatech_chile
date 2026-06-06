@@ -184,3 +184,49 @@ Si quieres desarrollar con debugging, hot-reload o modificar el código rápidam
 - **Frontend no carga**: Verifica que el API Gateway esté corriendo y accesible.
 
 Si encuentras problemas específicos, revisa los logs con `docker-compose logs <servicio>` o consulta la documentación en `docs/`.
+
+## Tests y Cobertura
+
+El proyecto usa Maven multi-módulo y JaCoCo para generar los reportes de cobertura por microservicio. No es necesario tener Docker levantado para ejecutar los tests; puedes correrlos directamente con el wrapper de Maven desde la raíz del repositorio.
+
+### Ejecutar pruebas por microservicio
+
+Ejecuta cada módulo por separado cuando quieras aislar fallos o revisar la cobertura de un servicio específico:
+
+```powershell
+# Project Service
+.\mvnw -pl app/backend/project-service clean test
+
+# Resource Service
+.\mvnw -pl app/backend/resource-service clean test
+
+# Analytics Service
+.\mvnw -pl app/backend/analytics-service clean test
+
+# API Gateway
+.\mvnw -pl app/backend/api-gateway clean test
+```
+
+### Reportes de cobertura JaCoCo
+
+Después de ejecutar los tests, cada microservicio genera su reporte HTML en:
+
+- `app/backend/project-service/target/site/jacoco/index.html`
+- `app/backend/resource-service/target/site/jacoco/index.html`
+- `app/backend/analytics-service/target/site/jacoco/index.html`
+- `app/backend/api-gateway/target/site/jacoco/index.html`
+
+
+### Abrir los reportes en Windows
+
+```powershell
+start app\backend\project-service\target\site\jacoco\index.html
+start app\backend\resource-service\target\site\jacoco\index.html
+start app\backend\analytics-service\target\site\jacoco\index.html
+start app\backend\api-gateway\target\site\jacoco\index.html
+```
+
+### Observaciones sobre las pruebas
+
+- Los tests unitarios usan `JUnit 5`, `Mockito` y `AssertJ`.
+- `JaCoCo` está configurado en el `pom.xml` raíz, por lo que el reporte se genera automáticamente al ejecutar `test`.
