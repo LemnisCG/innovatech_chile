@@ -17,7 +17,10 @@ export default defineConfig({
   // docker-compose, ya que las páginas hacen fetch real al gateway en :9000.
   // Por eso no se define `webServer`: levantar solo `next dev` no basta.
   projects: [
-    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
-    { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
+    // Prepara el entorno: registra el usuario E2E y guarda la sesión
+    // autenticada (storageState) que reutilizan los tests de logout.
+    { name: 'setup', testMatch: /auth\.setup\.ts/ },
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] }, dependencies: ['setup'] },
+    { name: 'firefox', use: { ...devices['Desktop Firefox'] }, dependencies: ['setup'] },
   ],
 });

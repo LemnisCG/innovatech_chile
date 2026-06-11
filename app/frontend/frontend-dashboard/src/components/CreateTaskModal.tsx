@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Plus } from 'lucide-react';
 import { Usuario } from '@/services/api';
@@ -13,11 +13,6 @@ interface CreateTaskModalProps {
 
 export function CreateTaskModal({ usuarios, addTaskAction, isLoggedIn }: CreateTaskModalProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   if (!isLoggedIn) {
     return (
@@ -52,19 +47,19 @@ export function CreateTaskModal({ usuarios, addTaskAction, isLoggedIn }: CreateT
             className="space-y-5"
           >
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1.5">Nombre de la Tarea</label>
-              <input type="text" name="nombre" required className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow" placeholder="Ej. Diseño de la base de datos" />
+              <label htmlFor="task-nombre" className="block text-sm font-medium text-slate-300 mb-1.5">Nombre de la Tarea</label>
+              <input type="text" id="task-nombre" name="nombre" required className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow" placeholder="Ej. Diseño de la base de datos" />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1.5">Descripción</label>
-              <textarea name="descripcion" rows={3} required className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow" placeholder="Detalla los requerimientos de la tarea..."></textarea>
+              <label htmlFor="task-descripcion" className="block text-sm font-medium text-slate-300 mb-1.5">Descripción</label>
+              <textarea id="task-descripcion" name="descripcion" rows={3} required className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow" placeholder="Detalla los requerimientos de la tarea..."></textarea>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1.5">Estado</label>
-                <select name="estado" className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow">
+                <label htmlFor="task-estado" className="block text-sm font-medium text-slate-300 mb-1.5">Estado</label>
+                <select id="task-estado" name="estado" className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow">
                   <option value="PENDIENTE">Pendiente</option>
                   <option value="EN_PROGRESO">En Progreso</option>
                   <option value="COMPLETADO">Completado</option>
@@ -72,8 +67,8 @@ export function CreateTaskModal({ usuarios, addTaskAction, isLoggedIn }: CreateT
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1.5">Responsable</label>
-                <select name="idProfesionalAsignado" className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow">
+                <label htmlFor="task-responsable" className="block text-sm font-medium text-slate-300 mb-1.5">Responsable</label>
+                <select id="task-responsable" name="idProfesionalAsignado" className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow">
                   <option value="">-- Sin asignar --</option>
                   {usuarios.map(u => (
                     <option key={u.id} value={u.id}>{u.username} ({u.especialidad})</option>
@@ -84,18 +79,18 @@ export function CreateTaskModal({ usuarios, addTaskAction, isLoggedIn }: CreateT
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1.5">Fecha de Inicio</label>
-                <input type="date" name="fechaInicio" className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow style-color-scheme-dark" />
+                <label htmlFor="task-fecha-inicio" className="block text-sm font-medium text-slate-300 mb-1.5">Fecha de Inicio</label>
+                <input type="date" id="task-fecha-inicio" name="fechaInicio" className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow style-color-scheme-dark" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1.5">Fecha de Fin</label>
-                <input type="date" name="fechaFin" className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow style-color-scheme-dark" />
+                <label htmlFor="task-fecha-fin" className="block text-sm font-medium text-slate-300 mb-1.5">Fecha de Fin</label>
+                <input type="date" id="task-fecha-fin" name="fechaFin" className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow style-color-scheme-dark" />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1.5">Comentarios Adicionales</label>
-              <textarea name="comentarios" rows={2} className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow" placeholder="Notas, enlaces útiles..."></textarea>
+              <label htmlFor="task-comentarios" className="block text-sm font-medium text-slate-300 mb-1.5">Comentarios Adicionales</label>
+              <textarea id="task-comentarios" name="comentarios" rows={2} className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow" placeholder="Notas, enlaces útiles..."></textarea>
             </div>
 
             <div className="pt-4 border-t border-slate-800 flex gap-3 justify-end">
@@ -129,7 +124,9 @@ export function CreateTaskModal({ usuarios, addTaskAction, isLoggedIn }: CreateT
         Agregar Nueva Tarea
       </button>
 
-      {mounted && isOpen && createPortal(modalContent, document.body)}
+      {/* isOpen solo puede ser true tras un click del usuario (post-hidratación),
+          así que `document` siempre existe cuando se renderiza el portal. */}
+      {isOpen && createPortal(modalContent, document.body)}
     </>
   );
 }
