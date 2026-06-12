@@ -9,8 +9,8 @@ test.describe('Flujo de autenticación', () => {
   test('un login correcto redirige al dashboard y muestra la sesión activa', async ({ page }) => {
     await page.goto('/login');
 
-    await page.getByLabel('Usuario').fill(E2E_USER.username);
-    await page.getByLabel('Contraseña').fill(E2E_USER.password);
+    await page.locator('input[name="username"]').fill(E2E_USER.username);
+    await page.locator('input[name="password"]').fill(E2E_USER.password);
     await page.getByRole('button', { name: 'Entrar' }).click();
 
     await expect(page).toHaveURL('/');
@@ -21,8 +21,8 @@ test.describe('Flujo de autenticación', () => {
   test('un login con credenciales inválidas muestra el error y permanece en el login', async ({ page }) => {
     await page.goto('/login');
 
-    await page.getByLabel('Usuario').fill('usuario-inexistente');
-    await page.getByLabel('Contraseña').fill('clave-incorrecta');
+    await page.locator('input[name="username"]').fill('usuario-inexistente');
+    await page.locator('input[name="password"]').fill('clave-incorrecta');
     await page.getByRole('button', { name: 'Entrar' }).click();
 
     // Señal positiva (el mensaje de error renderizado por useActionState) en
@@ -46,6 +46,6 @@ test.describe('Cierre de sesión', () => {
     await page.getByRole('button', { name: 'Salir' }).click();
 
     await expect(page).toHaveURL('/login');
-    await expect(page.getByLabel('Usuario')).toBeVisible();
+    await expect(page.locator('input[name="username"]')).toBeVisible();
   });
 });
