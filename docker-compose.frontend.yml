@@ -1,0 +1,20 @@
+services:
+  api-gateway:
+    image: ${ECR_REGISTRY}/innovatech-api-gateway:latest
+    container_name: innovatech_api_gateway
+    restart: on-failure
+    ports:
+      - "9000:9000"
+    environment:
+      PROJECT_SERVICE_URL: http://${BACKEND_HOST}:8081
+      RESOURCE_SERVICE_URL: http://${BACKEND_HOST}:8082
+      ANALYTICS_SERVICE_URL: http://${BACKEND_HOST}:8083
+
+  frontend:
+    image: ${ECR_REGISTRY}/innovatech-frontend:latest
+    container_name: innovatech_frontend
+    restart: on-failure
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api-gateway

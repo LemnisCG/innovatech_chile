@@ -1,0 +1,30 @@
+services:
+  project-service:
+    image: ${ECR_REGISTRY}/innovatech-project-service:latest
+    container_name: innovatech_project_service
+    restart: on-failure
+    ports:
+      - "8081:8081"
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: 5435
+
+  resource-service:
+    image: ${ECR_REGISTRY}/innovatech-resource-service:latest
+    container_name: innovatech_resource_service
+    restart: on-failure
+    ports:
+      - "8082:8082"
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: 5434
+
+  analytics-service:
+    image: ${ECR_REGISTRY}/innovatech-analytics-service:latest
+    container_name: innovatech_analytics_service
+    restart: on-failure
+    ports:
+      - "8083:8083"
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: 5436

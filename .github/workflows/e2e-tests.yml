@@ -1,0 +1,59 @@
+name: E2E Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  e2e:
+    name: Playwright E2E
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start full stack with Docker Compose
+        run: |
+          docker compose up -d --build
+          echo "Waiting for services to be healthy..."
+          timeout 120 bash -c 'until curl -sf http://localhost:9000/actuator/health 2>/dev/null || curl -sf http://localhost:8082/actuator/health 2>/dev/null; do sleep 5; done'
+          sleep 10
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: app/frontend/frontend-dashboard/pnpm-lock.yaml
+
+      - name: Install frontend dependencies
+        working-directory: app/frontend/frontend-dashboard
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        working-directory: app/frontend/frontend-dashboard
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run Playwright tests
+        working-directory: app/frontend/frontend-dashboard
+        run: pnpm test:e2e
+        env:
+          PLAYWRIGHT_BASE_URL: http://localhost:3000
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: app/frontend/frontend-dashboard/playwright-report/
+          retention-days: 7
+
+      - name: Docker Compose logs on failure
+        if: failure()
+        run: docker compose logs --tail=100
