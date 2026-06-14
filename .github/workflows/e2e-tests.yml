@@ -18,15 +18,24 @@ jobs:
       - name: Start full stack with Docker Compose
         run: |
           docker compose up -d --build
-          echo "Waiting for services to be healthy..."
-          timeout 180 bash -c '
-            until nc -z localhost 9000 && nc -z localhost 3000; do
-              echo "  puertos aun no disponibles, esperando..."
+          echo "Esperando que resource-service este listo (respuesta HTTP real)..."
+          timeout 240 bash -c '
+            until STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+              http://localhost:9000/api/auth/login \
+              -H "Content-Type: application/json" \
+              -d "{\"username\":\"ping\",\"password\":\"ping\"}"); \
+              echo "  gateway status: $STATUS"; \
+              echo "$STATUS" | grep -qE "^(200|400|401|403)"; do
               sleep 5
             done
           '
-          echo "Puertos listos, esperando warm-up..."
-          sleep 15
+          echo "Gateway y resource-service listos. Esperando frontend..."
+          timeout 60 bash -c '
+            until curl -sf http://localhost:3000 > /dev/null 2>&1; do
+              sleep 3
+            done
+          '
+          sleep 5
 
       - uses: pnpm/action-setup@v4
         with:
