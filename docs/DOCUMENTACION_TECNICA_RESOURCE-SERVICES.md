@@ -6,7 +6,7 @@
 > **Base de datos:** PostgreSQL 15 — `innovatech_resources` (puerto 5434)  
 > **Última actualización:** 28 de Abril de 2026
 
----
+----
 
 ## 📑 Índice
 
