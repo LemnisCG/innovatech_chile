@@ -112,7 +112,7 @@ jobs:
 
       - name: Deploy database via SSM
         run: |
-          COMPOSE=$(cat docker-compose.db.yml | base64 -w 0)
+          COMPOSE=$(cat .github/workflows/docker-compose.db.yml | base64 -w 0)
           COMMAND_ID=$(aws ssm send-command \
             --instance-ids "${{ secrets.EC2_DB_INSTANCE_ID }}" \
             --document-name "AWS-RunShellScript" \
@@ -154,7 +154,7 @@ jobs:
 
       - name: Deploy backend via SSM
         run: |
-          COMPOSE=$(cat docker-compose.backend.yml | base64 -w 0)
+          COMPOSE=$(cat .github/workflows/docker-compose.backend.yml | base64 -w 0)
           COMMAND_ID=$(aws ssm send-command \
             --instance-ids "${{ secrets.EC2_BACKEND_INSTANCE_ID }}" \
             --document-name "AWS-RunShellScript" \
@@ -198,7 +198,7 @@ jobs:
 
       - name: Deploy frontend via SSM
         run: |
-          COMPOSE=$(cat docker-compose.frontend.yml | base64 -w 0)
+          COMPOSE=$(cat .github/workflows/docker-compose.frontend.yml | base64 -w 0)
           COMMAND_ID=$(aws ssm send-command \
             --instance-ids "${{ secrets.EC2_FRONTEND_INSTANCE_ID }}" \
             --document-name "AWS-RunShellScript" \
