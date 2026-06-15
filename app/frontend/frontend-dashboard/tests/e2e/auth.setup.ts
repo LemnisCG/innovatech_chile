@@ -23,8 +23,8 @@ setup('registra el usuario E2E y guarda una sesión autenticada', async ({ page,
   });
 
   await page.goto('/login');
-  await page.getByLabel('Usuario').fill(E2E_USER.username);
-  await page.getByLabel('Contraseña').fill(E2E_USER.password);
+  await page.locator('input[name="username"]').fill(E2E_USER.username);
+  await page.locator('input[name="password"]').fill(E2E_USER.password);
   await page.getByRole('button', { name: 'Entrar' }).click();
 
   await expect(page, 'el usuario E2E debe poder iniciar sesión tras el setup').toHaveURL('/');
