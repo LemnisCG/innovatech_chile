@@ -1,5 +1,19 @@
 import { defineConfig, devices } from '@playwright/test';
 
+// Ubuntu 26.04 no está soportado por los binarios bundleados de Playwright.
+// Usar PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH para apuntar a un Chrome del sistema
+// (e.g. google-chrome-stable). Firefox requiere el binario parchado de Playwright
+// y no puede reemplazarse con el del sistema, por eso está deshabilitado hasta que
+// Playwright soporte Ubuntu 26.04.
+const chromiumLaunchOptions = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
+  ? {
+      launchOptions: {
+        executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH,
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      },
+    }
+  : {};
+
 export default defineConfig({
   testDir: './tests/e2e',
   testMatch: '**/*.spec.ts',
@@ -19,8 +33,7 @@ export default defineConfig({
   projects: [
     // Prepara el entorno: registra el usuario E2E y guarda la sesión
     // autenticada (storageState) que reutilizan los tests de logout.
-    { name: 'setup', testMatch: /auth\.setup\.ts/ },
-    { name: 'chromium', use: { ...devices['Desktop Chrome'] }, dependencies: ['setup'] },
-    { name: 'firefox', use: { ...devices['Desktop Firefox'] }, dependencies: ['setup'] },
+    { name: 'setup', testMatch: /auth\.setup\.ts/, use: { ...chromiumLaunchOptions } },
+    { name: 'chromium', use: { ...devices['Desktop Chrome'], ...chromiumLaunchOptions }, dependencies: ['setup'] },
   ],
 });
