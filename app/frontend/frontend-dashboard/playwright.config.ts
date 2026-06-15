@@ -1,18 +1,17 @@
 import { defineConfig, devices } from '@playwright/test';
 
-// Ubuntu 26.04 no está soportado por los binarios bundleados de Playwright.
-// Usar PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH para apuntar a un Chrome del sistema
-// (e.g. google-chrome-stable). Firefox requiere el binario parchado de Playwright
-// y no puede reemplazarse con el del sistema, por eso está deshabilitado hasta que
-// Playwright soporte Ubuntu 26.04.
-const chromiumLaunchOptions = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
-  ? {
-      launchOptions: {
-        executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH,
-        args: ['--no-sandbox', '--disable-setuid-sandbox'],
-      },
-    }
-  : {};
+// --no-sandbox es requerido tanto en Docker (imagen oficial de Playwright)
+// como en Ubuntu 26.04 con Chrome del sistema. Se aplica siempre.
+// PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH sobreescribe el binario solo cuando
+// los navegadores bundleados de Playwright no están disponibles (Ubuntu 26.04).
+const chromiumLaunchOptions = {
+  launchOptions: {
+    ...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
+      ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH }
+      : {}),
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+  },
+};
 
 export default defineConfig({
   testDir: './tests/e2e',

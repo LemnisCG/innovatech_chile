@@ -82,6 +82,25 @@ services:
     networks:
       - innovatech-network
 
+  # --- TEST RUNNER ---
+  # Solo se levanta con: docker-compose --profile test run --rm test-runner
+  # Corre vitest (unitarios) + playwright e2e contra el stack de Docker.
+  test-runner:
+    profiles: ["test"]
+    build:
+      context: ./app/frontend/frontend-dashboard
+      dockerfile: Dockerfile.test
+    container_name: innovatech_test_runner
+    environment:
+      - E2E_BASE_URL=http://frontend:3000
+      - E2E_GATEWAY_URL=http://api-gateway:9000
+      - CI=true
+    depends_on:
+      - frontend
+      - api-gateway
+    networks:
+      - innovatech-network
+
   # --- BASES DE DATOS ---
   # Base de datos exclusiva para el microservicio de Proyectos
   project-db:
