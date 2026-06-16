@@ -119,7 +119,7 @@ jobs:
             --parameters "commands=[
               'mkdir -p /home/ec2-user/innovatech',
               'echo $COMPOSE | base64 -d > /home/ec2-user/innovatech/docker-compose.db.yml',
-              'cd /home/ec2-user/innovatech && docker compose -f docker-compose.db.yml up -d',
+              'cd /home/ec2-user/innovatech && docker-compose -f docker-compose.db.yml up -d',
               'docker image prune -f'
             ]" \
             --query "Command.CommandId" --output text)
@@ -168,8 +168,8 @@ jobs:
               'mkdir -p /home/ec2-user/innovatech',
               'echo $COMPOSE | base64 -d > /home/ec2-user/innovatech/docker-compose.backend.yml',
               'aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_REGISTRY }}',
-              'cd /home/ec2-user/innovatech && ECR_REGISTRY=${{ env.ECR_REGISTRY }} DB_HOST=${{ secrets.EC2_DB_PRIVATE_IP }} docker compose -f docker-compose.backend.yml pull',
-              'cd /home/ec2-user/innovatech && ECR_REGISTRY=${{ env.ECR_REGISTRY }} DB_HOST=${{ secrets.EC2_DB_PRIVATE_IP }} docker compose -f docker-compose.backend.yml up -d --remove-orphans',
+              'cd /home/ec2-user/innovatech && ECR_REGISTRY=${{ env.ECR_REGISTRY }} DB_HOST=${{ secrets.EC2_DB_PRIVATE_IP }} docker-compose -f docker-compose.backend.yml pull',
+              'cd /home/ec2-user/innovatech && ECR_REGISTRY=${{ env.ECR_REGISTRY }} DB_HOST=${{ secrets.EC2_DB_PRIVATE_IP }} docker-compose -f docker-compose.backend.yml up -d --remove-orphans',
               'docker image prune -f'
             ]" \
             --query "Command.CommandId" --output text)
@@ -218,8 +218,8 @@ jobs:
               'mkdir -p /home/ec2-user/innovatech',
               'echo $COMPOSE | base64 -d > /home/ec2-user/innovatech/docker-compose.frontend.yml',
               'aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_REGISTRY }}',
-              'cd /home/ec2-user/innovatech && ECR_REGISTRY=${{ env.ECR_REGISTRY }} BACKEND_HOST=${{ secrets.EC2_BACKEND_PRIVATE_IP }} docker compose -f docker-compose.frontend.yml pull',
-              'cd /home/ec2-user/innovatech && ECR_REGISTRY=${{ env.ECR_REGISTRY }} BACKEND_HOST=${{ secrets.EC2_BACKEND_PRIVATE_IP }} docker compose -f docker-compose.frontend.yml up -d --remove-orphans',
+              'cd /home/ec2-user/innovatech && ECR_REGISTRY=${{ env.ECR_REGISTRY }} BACKEND_HOST=${{ secrets.EC2_BACKEND_PRIVATE_IP }} docker-compose -f docker-compose.frontend.yml pull',
+              'cd /home/ec2-user/innovatech && ECR_REGISTRY=${{ env.ECR_REGISTRY }} BACKEND_HOST=${{ secrets.EC2_BACKEND_PRIVATE_IP }} docker-compose -f docker-compose.frontend.yml up -d --remove-orphans',
               'docker image prune -f'
             ]" \
             --query "Command.CommandId" --output text)
