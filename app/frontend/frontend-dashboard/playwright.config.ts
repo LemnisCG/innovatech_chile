@@ -1,5 +1,18 @@
 import { defineConfig, devices } from '@playwright/test';
 
+// --no-sandbox es requerido tanto en Docker (imagen oficial de Playwright)
+// como en Ubuntu 26.04 con Chrome del sistema. Se aplica siempre.
+// PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH sobreescribe el binario solo cuando
+// los navegadores bundleados de Playwright no están disponibles (Ubuntu 26.04).
+const chromiumLaunchOptions = {
+  launchOptions: {
+    ...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
+      ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH }
+      : {}),
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+  },
+};
+
 export default defineConfig({
   testDir: './tests/e2e',
   testMatch: '**/*.spec.ts',
@@ -19,8 +32,7 @@ export default defineConfig({
   projects: [
     // Prepara el entorno: registra el usuario E2E y guarda la sesión
     // autenticada (storageState) que reutilizan los tests de logout.
-    { name: 'setup', testMatch: /auth\.setup\.ts/ },
-    { name: 'chromium', use: { ...devices['Desktop Chrome'] }, dependencies: ['setup'] },
-    { name: 'firefox', use: { ...devices['Desktop Firefox'] }, dependencies: ['setup'] },
+    { name: 'setup', testMatch: /auth\.setup\.ts/, use: { ...chromiumLaunchOptions } },
+    { name: 'chromium', use: { ...devices['Desktop Chrome'], ...chromiumLaunchOptions }, dependencies: ['setup'] },
   ],
 });

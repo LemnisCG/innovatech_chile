@@ -1,0 +1,74 @@
+name: E2E Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  e2e:
+    name: Playwright E2E
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start full stack with Docker Compose
+        run: |
+          docker compose up -d --build
+          echo "Esperando que resource-service este listo (respuesta HTTP real)..."
+          timeout 240 bash -c '
+            until STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+              http://localhost:9000/api/auth/login \
+              -H "Content-Type: application/json" \
+              -d "{\"username\":\"ping\",\"password\":\"ping\"}"); \
+              echo "  gateway status: $STATUS"; \
+              echo "$STATUS" | grep -qE "^(200|400|401|403)"; do
+              sleep 5
+            done
+          '
+          echo "Gateway y resource-service listos. Esperando frontend..."
+          timeout 60 bash -c '
+            until curl -sf http://localhost:3000 > /dev/null 2>&1; do
+              sleep 3
+            done
+          '
+          sleep 5
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: app/frontend/frontend-dashboard/pnpm-lock.yaml
+
+      - name: Install frontend dependencies
+        working-directory: app/frontend/frontend-dashboard
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        working-directory: app/frontend/frontend-dashboard
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run Playwright tests
+        working-directory: app/frontend/frontend-dashboard
+        run: pnpm test:e2e
+        env:
+          PLAYWRIGHT_BASE_URL: http://localhost:3000
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: app/frontend/frontend-dashboard/playwright-report/
+          retention-days: 7
+
+      - name: Docker Compose logs on failure
+        if: failure()
+        run: docker compose logs --tail=100
