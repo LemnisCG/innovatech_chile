@@ -8,7 +8,7 @@ Este documento tiene como objetivo explicar las decisiones tomadas en el diseño
 
 En la propuesta inicial se definieron estratégicamente **dos microservicios core** (Project y Resource) junto con un **API Gateway** y un **BFF**. 
 
-### ¿Por qué no un microservicio dedicado a Monitoreo y Analítica?
+### ¿Por qué no un microservicio dedicado a Monitoreo y Analítica??
 En arquitecturas iniciales, el monitoreo a menudo consiste en leer información estructurada desde otros servicios. Proponer un microservicio puro de "Analítica" requeriría de entrada lidiar con arquitecturas complejas de sincronización de datos o eventos (ej. Kafka) para mantener una copia de los datos de proyectos y recursos. En su lugar, utilizamos el **BFF (Backend for Frontend)** para interceptar las peticiones del dashboard en el UI, recolectar datos en paralelo desde `ProjectService` y `ResourceService`, y consolidarlos al vuelo para mostrarlos en pantalla. Según el requerimiento del caso de estudio, se requiere *un BFF y dos microservicios*, encajando perfectamente este patrón (el BFF asume el rol agregador de la analítica en tiempo real). Si a futuro el volumen crece masivamente, el BFF daría paso a una base de consultas tipo *Data Warehouse*.
 
 ### ¿Por qué no un microservicio dedicado a la Creación de Usuarios (IAM / Auth Service)?

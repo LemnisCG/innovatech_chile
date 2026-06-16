@@ -2,7 +2,7 @@ import { fetchProjectById, fetchUsuarios } from '@/services/api';
 import { createTaskAction, updateTaskStatusAction } from '@/app/actions';
 import { notFound } from 'next/navigation';
 import { cookies } from 'next/headers';
-import { Calendar, CheckCircle2 } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 import { CreateTaskModal } from '@/components/CreateTaskModal';
 
 export default async function ProjectDetailsPage({ params }: { params: { id: string } }) {

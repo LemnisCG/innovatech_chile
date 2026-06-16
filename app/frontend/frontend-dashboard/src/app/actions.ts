@@ -12,7 +12,11 @@ const getAuthHeaders = async () => {
   return token ? { Authorization: `Bearer ${token}` } : undefined;
 };
 
-export async function loginAction(formData: FormData) {
+export interface LoginState {
+  error?: string;
+}
+
+export async function loginAction(_prevState: LoginState, formData: FormData): Promise<LoginState> {
   const username = formData.get('username') as string;
   const password = formData.get('password') as string;
 
@@ -24,17 +28,15 @@ export async function loginAction(formData: FormData) {
     });
 
     if (!res.ok) {
-      throw new Error('Credenciales inválidas');
+      return { error: 'Credenciales inválidas' };
     }
 
     const authResponse = await res.json();
     const cookieStore = await cookies();
     cookieStore.set('token', authResponse.token, { httpOnly: true, path: '/' });
     cookieStore.set('session', username, { path: '/' });
-
-  } catch (error) {
-    if (error instanceof Error && error.message === 'NEXT_REDIRECT') throw error;
-    throw new Error('Error de conexión con el servidor');
+  } catch {
+    return { error: 'Error de conexión con el servidor' };
   }
 
   redirect('/');
