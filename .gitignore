@@ -21,6 +21,7 @@ Thumbs.db
 .env
 .env.*
 *.env
+K8s/secrets.yaml
 
 # Dependencias de Node generales
 node_modules/
@@ -30,3 +31,5 @@ build/
 # Logs generados por las aplicaciones
 *.log
 logs/
+
+devops

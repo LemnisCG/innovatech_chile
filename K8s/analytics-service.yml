@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: analytics-service
+  namespace: innovatech
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: analytics-service
+  template:
+    metadata:
+      labels:
+        app: analytics-service
+    spec:
+      containers:
+      - name: analytics-service
+        image: 343602460192.dkr.ecr.us-east-1.amazonaws.com/innovatech-analytics-service:eks-v1
+        env:
+        - name: DB_HOST
+          value: "analytics-db-service"
+        - name: DB_PORT
+          value: "5432"
+        ports:
+        - containerPort: 8083
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: analytics-service
+  namespace: innovatech
+spec:
+  ports:
+  - port: 8083
+    targetPort: 8083
+  selector:
+    app: analytics-service

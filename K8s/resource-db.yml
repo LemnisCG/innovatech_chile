@@ -1,0 +1,64 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: resource-db-pvc
+  namespace: innovatech
+spec:
+  storageClassName: ebs-gp3
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: resource-db
+  namespace: innovatech
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: resource-db
+  template:
+    metadata:
+      labels:
+        app: resource-db
+    spec:
+      containers:
+      - name: resource-db
+        image: 343602460192.dkr.ecr.us-east-1.amazonaws.com/innovatech-db:eks-v1
+        env:
+        - name: POSTGRES_DB
+          value: "innovatech_resources"
+        - name: POSTGRES_USER
+          value: "postgres"
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-credentials
+              key: postgres-password
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+        ports:
+        - containerPort: 5432
+        volumeMounts:
+        - name: db-data
+          mountPath: /var/lib/postgresql/data
+      volumes:
+      - name: db-data
+        persistentVolumeClaim:
+          claimName: resource-db-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: resource-db-service
+  namespace: innovatech
+spec:
+  ports:
+  - port: 5432
+    targetPort: 5432
+  selector:
+    app: resource-db

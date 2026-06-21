@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: innovatech
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend
+        # NEXT_PUBLIC_API_URL ya quedó incrustado en el build de la imagen
+        # (debe haber sido construida con --build-arg NEXT_PUBLIC_API_URL=http://api-gateway-service:9000)
+        image: 343602460192.dkr.ecr.us-east-1.amazonaws.com/innovatech-frontend:eks-v1
+        env:
+        - name: NEXT_PUBLIC_API_URL
+          value: "http://api-gateway-service:9000"
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "300m"
+            memory: "256Mi"
+        ports:
+        - containerPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+  namespace: innovatech
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+    service.beta.kubernetes.io/aws-load-balancer-type: external
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 3000
+  selector:
+    app: frontend
